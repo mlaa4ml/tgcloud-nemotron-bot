@@ -101,6 +101,6 @@ export const userRateLimit = table('user_rate_limit', {
 
 // Глобальный лимит скорости: время последнего запроса к модели от любого пользователя.
 export const globalRateLimit = table('global_rate_limit', {
-  id:           integer('id').primaryKey({ autoIncrement: true }),
-  lastRequest:  integer('last_request').notNull().default(0)
+  id:          integer('id').primaryKey(),
+  lastRequest: integer('last_request').notNull().default(0)
 });

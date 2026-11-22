@@ -228,7 +228,7 @@ export async function checkRateLimit(userId) {
   const now = Math.floor(Date.now() / 1000) * 1000;
 
   const userLimit = await db.select().from(userRateLimit).where(eq(userRateLimit.userId, userId)).get();
-  const globalLimit = await db.select().from(globalRateLimit).limit(1).all();
+  const globalLimit = await db.select().from(globalRateLimit).get();
 
   let userWaitMs = 0;
   if (userLimit) {
@@ -239,8 +239,8 @@ export async function checkRateLimit(userId) {
   }
 
   let globalWaitMs = 0;
-  if (globalLimit && globalLimit[0]) {
-    const elapsed = now - globalLimit[0].lastRequest;
+  if (globalLimit) {
+    const elapsed = now - globalLimit.lastRequest;
     if (elapsed < MODEL_RATE_LIMIT_MS) {
       globalWaitMs = MODEL_RATE_LIMIT_MS - elapsed;
     }
@@ -256,17 +256,27 @@ export async function checkRateLimit(userId) {
 export async function recordRateLimit(userId) {
   const now = Math.floor(Date.now() / 1000) * 1000;
 
-  await db.upsert(userRateLimit)
-    .values({ userId, lastRequest: now })
-    .run();
-
-  const rows = await db.select().from(globalRateLimit).limit(1).all();
-  if (rows.length === 0) {
-    await db.insert(globalRateLimit).values({ lastRequest: now }).run();
+  const existingUser = await db.select().from(userRateLimit).where(eq(userRateLimit.userId, userId)).get();
+  if (existingUser) {
+    await db.update(userRateLimit)
+      .set({ lastRequest: now })
+      .where(eq(userRateLimit.userId, userId))
+      .run();
   } else {
+    await db.insert(userRateLimit)
+      .values({ userId, lastRequest: now })
+      .run();
+  }
+
+  const existingGlobal = await db.select().from(globalRateLimit).where(eq(globalRateLimit.id, 1)).get();
+  if (existingGlobal) {
     await db.update(globalRateLimit)
       .set({ lastRequest: now })
-      .where(eq(globalRateLimit.id, rows[0].id))
+      .where(eq(globalRateLimit.id, 1))
+      .run();
+  } else {
+    await db.insert(globalRateLimit)
+      .values({ id: 1, lastRequest: now })
       .run();
   }
 }
