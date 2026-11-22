@@ -1,0 +1,21 @@
+{
+  "name": "tgcloud-nemotron-bot",
+  "version": "1.0.0",
+  "description": "Telegram Serverless bot with NVIDIA Nemotron 3.5 Super VL",
+  "private": true,
+  "scripts": {
+    "deploy": "npx tgcloud push",
+    "run": "npx tgcloud run",
+    "status": "npx tgcloud status",
+    "diff": "npx tgcloud diff",
+    "login": "npx tgcloud login",
+    "migrate": "npx tgcloud migrate",
+    "reset": "npx tgcloud reset"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "latest"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
