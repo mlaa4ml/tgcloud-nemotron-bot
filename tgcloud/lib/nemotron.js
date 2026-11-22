@@ -165,6 +165,22 @@ export async function getResponse(userMessage) {
 }
 
 /**
+ * Отправляет запрос модели с полной историей диалога и возвращает её ответ.
+ *
+ * @param {Array} messages - массив сообщений в формате API (включая system и историю)
+ * @returns {Promise<string>} текст ответа модели
+ */
+export async function chatWithHistory(messages) {
+  return chat([
+    {
+      role: 'system',
+      content: 'Вы — полезный ассистент в Телеграм-боте. Отвечайте по-русски, кратко и по существу.'
+    },
+    ...messages
+  ]);
+}
+
+/**
  * Отправляет текст и изображения модели и возвращает её ответ.
  *
  * @param {string} text - текст подписи к фото (может быть пустым)
